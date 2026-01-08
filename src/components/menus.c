@@ -5,12 +5,10 @@
 
 enum MenuState {MAIN, CONNECT, SETTINGS, CREDITS};
 enum MenuState menuState;
-
+bool firstOpen = true;
 #define STAR_COUNT 150
-
 Vector3 stars[STAR_COUNT] = {0};
 Vector2 starsScrPos[STAR_COUNT] = {0};
-
 void DrawMenu() {
     float delta = GetFrameTime();
     Color bgColor = {0,0,25,255};

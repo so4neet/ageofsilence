@@ -1,7 +1,7 @@
 #include <kos.h>
 #include <raylib.h>
 #include <pthread.h>
-#include <wav/sndwav.h>
+#include <oggvorbis/sndoggvorbis.h>
 #include "components/input.h"
 #include "components/menus.h"
 
@@ -16,6 +16,7 @@ bool doneLoading = false;
 KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
 
 void *loadAssets();
+void *playSnd();
 
 int main() {
     pthread_t loadThread;
@@ -23,6 +24,7 @@ int main() {
     enum MapToLoad mapToLoad;
 
     int splashTimer = 0;
+    int volume = 100;
     int rotSquare = 0;
     float fadeOpacity = 1.0f;
     bool unloadSplash = false;
@@ -34,8 +36,9 @@ int main() {
     Image splImg = LoadImage("/cd/assets/tex/ogresden.png");
     Texture2D splTex = LoadTextureFromImage(splImg);
     UnloadImage(splImg);
-    wav_init();
-    wav_create("/cd/assets/snd/splash_aos.wav");
+    snd_stream_init();
+    sndoggvorbis_init();
+    sndoggvorbis_start("/cd/assets/snd/splash_aos.ogg", 0);
     while(!WindowShouldClose()){
         BeginDrawing();
         ClearBackground(BLACK);
@@ -50,6 +53,7 @@ int main() {
                 if(splashTimer == 300 || startState == 1){
                     unloadSplash = true;
                     fadeOpacity = 1.0f;
+                    sndoggvorbis_stop();
                     currentState = MENU;
                 }
                 if(splashTimer < 60) {
@@ -67,6 +71,9 @@ int main() {
                     UnloadTexture(splTex);
                     unloadSplash = false;
                 }
+                if(!sndoggvorbis_isplaying()){
+                    sndoggvorbis_start("/cd/assets/snd/aos_menu.ogg", 1);
+                }
                 DrawMenu();
                 DrawRectangle(0,0,scrWidth,scrHeight, Fade(BLACK, fadeOpacity));
                 if(startGame){
@@ -79,10 +86,13 @@ int main() {
                 } else {
                     if(fadeOpacity < 1.0f){
                         fadeOpacity += 0.016f;
+                        volume -= 1;
+                        sndoggvorbis_volume(volume);
                     } else {
                         fadeOpacity = 1.0f;
                         startFade = false;
                         startLoadThread = true;
+                        sndoggvorbis_stop();
                         currentState = LOADING;
                     }
                 }
@@ -147,6 +157,9 @@ void *loadAssets() {
     Texture2D tt4 = LoadTextureFromImage(t1);
     UnloadImage(t4);
     UnloadTexture(tt4);
+    int volume = 255;
+    sndoggvorbis_volume(volume);
+    sndoggvorbis_start("/cd/assets/snd/aos_ambiance.ogg", 1);
     doneLoading = true;
     return NULL;
 }

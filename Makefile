@@ -3,7 +3,7 @@
 # Blaire McArthur, 2025
 
 TARGET = aos.elf
-OBJS = src/main.o src/components/input.o src/components/menus.o
+OBJS = src/main.o src/components/input.o src/components/menus.o romdisk.o
 KOS_ROMDISK_DIR = romdisk
 
 KOS_CFLAGS += -I${KOS_PORTS}/include/raylib
@@ -19,7 +19,7 @@ rm-elf:
 	-rm -f $(TARGET) romdisk.*
 
 $(TARGET): $(OBJS)
-	kos-c++ -o $(TARGET) $(OBJS) -lraylib -lGL -lkosutils -lpthread
+	kos-c++ -o $(TARGET) $(OBJS) -lraylib -lGL -lkosutils -lpthread -ltremor -lwav
 
 run: $(TARGET)
 	$(KOS_LOADER) $(TARGET)
