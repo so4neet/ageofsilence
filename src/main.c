@@ -1,9 +1,9 @@
 #include <kos.h>
 #include <raylib.h>
 #include <pthread.h>
+#include <wav/sndwav.h>
 #include "components/input.h"
 #include "components/menus.h"
-
 
 const int scrWidth = 640;
 const int scrHeight = 480;
@@ -13,7 +13,6 @@ enum MapToLoad {TESTMAP, DESERT};
 bool startGame = false;
 bool startLoadThread = false;
 bool doneLoading = false;
-int testInt = 0;
 KOS_INIT_FLAGS(INIT_DEFAULT | INIT_MALLOCSTATS);
 
 void *loadAssets();
@@ -24,6 +23,7 @@ int main() {
     enum MapToLoad mapToLoad;
 
     int splashTimer = 0;
+    int rotSquare = 0;
     float fadeOpacity = 1.0f;
     bool unloadSplash = false;
     bool startFade = false;
@@ -34,6 +34,8 @@ int main() {
     Image splImg = LoadImage("/cd/assets/tex/ogresden.png");
     Texture2D splTex = LoadTextureFromImage(splImg);
     UnloadImage(splImg);
+    wav_init();
+    wav_create("/cd/assets/snd/splash_aos.wav");
     while(!WindowShouldClose()){
         BeginDrawing();
         ClearBackground(BLACK);
@@ -96,11 +98,8 @@ int main() {
                 switch(mapToLoad){
                     case DESERT: {
                         DrawText("Loading [wasteland planet name]", 40, 20, 20, WHITE);
-                        DrawRectanglePro((Rectangle){20, 30, 20, 20}, (Vector2){10, 10}, testInt, WHITE);
-                        if(testInt == 359){
-                            testInt = 0;
-                        }
-                        testInt = testInt+4;
+                        DrawRectanglePro((Rectangle){20, 30, 20, 20}, (Vector2){10, 10}, rotSquare, WHITE);
+                        rotSquare = rotSquare+4;
                         break;
                     }
                     case TESTMAP: {
@@ -126,7 +125,6 @@ int main() {
             }
         }
         EndDrawing();
-
     }
     CloseWindow();
     return 0;
